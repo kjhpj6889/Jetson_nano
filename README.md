@@ -69,52 +69,52 @@ while True:
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 
     t1 = time.time()
-    정류 = 검출기(gray, 1)
+    rects = detector(gray, 1)
     t2 = time.time()
 
-    eye_closed = 거짓
+    eye_closed = False
 
-    직역에서 dets의 경우:
-     face_parts_dets = face_parts_detector(gray, dets)
-     face_parts = face_utils.shape_to_np(face_parts_dets)
+    for dets in rects:
+        face_parts_dets = face_parts_detector(gray, dets)
+        face_parts = face_utils.shape_to_np(face_parts_dets)
 
-     (xx, yy)에 대해 face_parts:
-     CV2.circle(이미지, (xx, yy), 2, (0, 255, 0), 두께=-1)
+        for (xx, yy) in face_parts:
+            cv2.circle(image, (xx, yy), 2, (0, 255, 0), thickness=-1)
 
-     # 눈 감김 감지
-     왼쪽 눈 = 얼굴 부분 [42:48]
-     왼쪽_eye_ear = calc_eye (왼쪽_eye)
-     오른쪽 눈 = 얼굴 부분 [36:42]
-     오른쪽_eye_ear = calc_eye (오른쪽_eye)
+        # 눈 감김 감지
+        left_eye = face_parts[42:48]
+        left_eye_ear = calc_eye(left_eye)
+        right_eye = face_parts[36:42]
+        right_eye_ear = calc_eye(right_eye)
 
-     (왼쪽_눈_귀 + 오른쪽_눈_귀) < 0.47인 경우:
-     눈_닫힌 = 참
-     cv2.putText(이미지, "눈 감기!!!", (10, 430), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.라인_AA)
-     그렇지 않으면:
-     centre_right_eye, centre_left_eye = eye_center(face_parts_dets)
-     CV2.circle(이미지, (int(센터_왼쪽_눈[0]), int(센터_왼쪽_눈[1]), 3, (0, 0, 255), -1)
+        if (left_eye_ear + right_eye_ear) < 0.47:
+            eye_closed = True
+            cv2.putText(image, "Close Your Eye !!!", (10, 430), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+        else:
+            center_right_eye, center_left_eye = eye_center(face_parts_dets)
+            cv2.circle(image, (int(center_left_eye[0]), int(center_left_eye[1])), 3, (0, 0, 255), -1)
             cv2.circle(image, (int(center_right_eye[0]), int(center_right_eye[1])), 3, (0, 0, 255), -1)
             eye_closed = False
 
     # 눈 감김 상태일 경우 부저 울리기
     if eye_closed:
-     비프_온 ()
-     시간.수면(3)
-     비프_오프 ()
+        beep_on()
+        time.sleep(3)
+        beep_off()
     
     # FPS 및 감지 시간 표시
-    fps = cv2.getTickFrequency() / (cv2.getTickCount() - 틱)
+    fps = cv2.getTickFrequency() / (cv2.getTickCount() - tick)
     detect_time = t2 - t1
-    cv2.putText(이미지, "FPS: {}}.format(int(fps))), (10, 450), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.라인_AA)
-    cv2.putText(이미지, "Detect Time: {:.2f}") 형식(Detect_time), (10, 465), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.라인_AA)
-    cv2.putText(이미지, "{}*{}}).format(int(프레임_폭), int(프레임_높이)), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.라인_AA)
+    cv2.putText(image, "FPS: {}".format(int(fps)), (10, 450), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+    cv2.putText(image, "Detect Time: {:.2f}".format(detect_time), (10, 465), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+    cv2.putText(image, "{}*{}".format(int(frame_width), int(frame_height)), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
 
     cv2.moveWindow("DLIB_Landmark", 200, 100)
-    cv2.imshow('DLIB_Landmark', 이미지)
+    cv2.imshow('DLIB_Landmark', image)
 
     k = cv2.waitKey(10) & 0xff
-    k == 27인 경우:
-     브레이크.
+    if k == 27:
+        break
 
 cap.release()
 GPIO.cleanup()
