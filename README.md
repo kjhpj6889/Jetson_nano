@@ -1,3 +1,4 @@
+# 젯슨 나노 졸음 방지 프로젝트 
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 import cv2
